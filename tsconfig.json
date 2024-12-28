@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "declaration": true,
+    "noImplicitAny": true,
+    "outDir": ".",
+    "target": "esnext",
+    "resolveJsonModule": true,
+    "baseUrl": "src",
+    "jsx": "react",
+    "paths": {
+      "@/*": ["*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
