@@ -1,3 +1,6 @@
+import { type NextRequest } from "next/server";
+import { getAuth } from "./utils";
+
 class TrieNode {
   isEnd: boolean;
   children: Map<string, TrieNode>;
@@ -9,16 +12,17 @@ class TrieNode {
   }
 }
 
-export class Trie {
+class Trie {
   private root: TrieNode;
   private memoize: Map<string, boolean> = new Map();
 
-  constructor() {
+  constructor(paths: string[]) {
     this.root = new TrieNode();
+    this.build(paths);
   }
 
   // Build the Trie from a list of paths
-  buildTrie(paths: string[]) {
+  private build(paths: string[]) {
     for (const path of paths) {
       let currentNode = this.root;
       const segments = path.split("/").filter(Boolean);
@@ -51,10 +55,9 @@ export class Trie {
         }
       }
     }
-    return this;
   }
 
-  matchPathInTrie(urlPath: string): boolean {
+  find(urlPath: string): boolean {
     if (this.memoize.has(urlPath)) {
       return this.memoize.get(urlPath)!;
     }
@@ -81,3 +84,11 @@ export class Trie {
     return result;
   }
 }
+
+export const getAuthMiddlware = (routes: string[]) => {
+  const { find: isAuthRequired } = new Trie(routes);
+  return async (request: NextRequest) => {
+    const { pathname } = request.nextUrl ?? {};
+    return isAuthRequired(pathname) && !!(await getAuth());
+  };
+};

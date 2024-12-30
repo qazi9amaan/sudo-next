@@ -1,20 +1,65 @@
 {
-  "name": "@sudo/next",
+  "name": "@qazi9amaan/sudo-next",
   "version": "1.0.0",
-  "description": "Next JS Authentication",
+  "description": "Next JS Custom Authentication",
+  "main": "dist/cjs/index.js",
+  "module": "dist/index.js",
+  "typings": "dist/types/app/server/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/app/server/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/types/app/server/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./client": {
+      "import": {
+        "types": "./dist/types/app/client/index.d.ts",
+        "default": "./dist/client/index.js"
+      },
+      "require": {
+        "types": "./dist/types/app/client/index.d.ts",
+        "default": "./dist/client/cjs/index.js"
+      }
+    },
+    "./plugins": {
+      "import": {
+        "types": "./dist/types/plugins/index.d.ts",
+        "default": "./dist/plugins/index.js"
+      },
+      "require": {
+        "types": "./dist/types/plugins/index.d.ts",
+        "default": "./dist/plugins/cjs/index.js"
+      }
+    },
+    "./edge": {
+      "import": {
+        "types": "./dist/types/app/edge/index.d.ts",
+        "default": "./dist/edge/index.js"
+      },
+      "require": {
+        "types": "./dist/types/app/edge/index.d.ts",
+        "default": "./dist/edge/cjs/index.js"
+      }
+    }
+  },
   "private": false,
   "keywords": [
     "nextjs",
     "auth"
   ],
   "scripts": {
-    "test": "vitest --watch=false",
-    "test:watch": "vitest",
-    "prepare": "husky"
+    "build": "rollup -c",
+    "prepare": "rollup -c",
+    "build:watch": "rollup -c -w",
+    "release": "release-it",
+    "lint": "eslint --ignore-path .eslintignore",
+    "prettier:fix": "prettier --write ."
   },
-  "files": [
-    "lib"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/qazi9amaan/sudo-next.git"
@@ -25,42 +70,45 @@
     "url": "https://github.com/qazi9amaan/sudo-next/issues"
   },
   "homepage": "https://github.com/qazi9amaan/sudo-next#readme",
-  "peerDependencies": {
-    "next": "15.1.2",
-    "react": "*",
-    "zustand": "*"
-  },
-  "dependencies": {
-    "iron-session": "^8.0.4",
-    "zustand": "5.0.2"
-  },
   "devDependencies": {
+    "@babel/core": "^7.17.12",
+    "@babel/preset-react": "^7.17.12",
+    "@babel/preset-typescript": "^7.23.3",
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "changelogen": "^0.5.5",
     "eslint": "^8.57.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.2",
     "next": "15.1.2",
     "prettier": "3.2.5",
-    "react": "^19.0.0",
-    "typescript": "^5.4.3",
-    "vitest": "^1.4.0"
+    "release-it": "^16.1.3",
+    "rollup": "^2.73.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "typescript": "^5.4.3"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+  "peerDependencies": {
+    "ioredis": "*",
+    "next": "*",
+    "react": "*",
+    "react-dom": "*"
   },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "vitest"
-    ]
-  }
+  "dependencies": {
+    "iron-session": "^8.0.4"
+  },
+  "files": [
+    "LICENSE.md",
+    "package.json",
+    "pnpm-lock.json",
+    "readme.md",
+    "dist"
+  ],
+  "packageManager": "pnpm@8.15.9+sha512.499434c9d8fdd1a2794ebf4552b3b25c0a633abcee5bb15e7b5de90f32f47b513aca98cd5cfd001c31f0db454bc3804edccd578501e4ca293a6816166bbd9f81"
 }

@@ -4,15 +4,13 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "declaration": true,
+    "declarationMap": true,
     "noImplicitAny": true,
-    "outDir": ".",
+    "declarationDir": "dist/types",
     "target": "esnext",
     "resolveJsonModule": true,
-    "baseUrl": "src",
-    "jsx": "react",
-    "paths": {
-      "@/*": ["*"]
-    }
+    "skipLibCheck": true,
+    "jsx": "react"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

@@ -1,6 +1,8 @@
-export interface User {}
+export interface SudoUser extends Record<string, any> {
+  id: string;
+}
 
-export interface Session extends User {
+export interface SudoSession extends SudoUser {
   expiresAt: number;
   sessionId: string;
 }
