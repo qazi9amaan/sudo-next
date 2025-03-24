@@ -1,11 +1,10 @@
 import { cache } from "react";
-import { SudoEnginee } from "../../core/engine";
 import { getSessionCookie } from "../../core/cookies";
-
-const { getConfig } = SudoEnginee.getInstance();
+import { SharedMemory } from "../../core/mem";
 
 export const getAuth = cache(async () => {
   const session = await getSessionCookie();
-  if (!getConfig().isGenuineSession(session)) return null;
+  const enginee = SharedMemory.getEnginee();
+  if (!enginee.isGenuineSession(session)) return null;
   return session;
 });

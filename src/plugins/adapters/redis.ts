@@ -1,62 +1,67 @@
 import Redis, { RedisOptions } from "ioredis";
-import _ from "crypto";
-import { SudoEnginee } from "../../core/engine";
-import { SudoAdapterBase } from "../../core/bases";
+import { createHash } from "crypto";
 import { SudoSession, SudoUser } from "../../types";
-
-const { getMaxAge } = SudoEnginee.getInstance().getConfig();
+import { SudoAdapterBase } from "./base";
 
 export class RedisAdapter extends SudoAdapterBase {
-  instance: Redis;
+  private readonly instance: Redis;
+  private readonly sessionPrefix = "session:";
 
   constructor(options: RedisOptions) {
     super();
     this.instance = new Redis(options);
   }
 
-  createSID(user: SudoUser) {
-    return _.createHash("sha256")
-      .update(JSON.stringify(user) + Date.now())
+  private createSID(user: SudoUser): string {
+    return createHash("sha256")
+      .update(`${JSON.stringify(user)}:${Date.now()}`)
       .digest("hex");
   }
 
-  async createSession(user: SudoUser) {
+  private getSessionKey(sessionId: string): string {
+    return `${this.sessionPrefix}${sessionId}`;
+  }
+
+  private async setSession(
+    sessionId: string,
+    session: SudoSession,
+    expiry: number,
+  ) {
+    const key = this.getSessionKey(sessionId);
+    await this.instance.set(key, JSON.stringify(session), "PX", expiry);
+  }
+
+  async createSession(user: SudoUser): Promise<SudoSession> {
     const sessionId = this.createSID(user);
+    const expiry = this.configs.sessionAge;
 
     const session: SudoSession = {
       ...user,
       sessionId,
-      expiresAt: Date.now() + 1000 * getMaxAge(),
+      expiresAt: Date.now() + expiry,
     };
 
-    await this.instance.set(
-      sessionId,
-      JSON.stringify(session),
-      "EX",
-      getMaxAge(),
-    );
-
+    await this.setSession(sessionId, session, expiry);
     return session;
   }
 
   async revalidateSession(sessionId: string) {
-    const session = await this.instance.get(sessionId);
-    if (!session) return null;
+    const key = this.getSessionKey(sessionId);
+    const sessionData = await this.instance.get(key);
 
-    const parsedSession: SudoSession = JSON.parse(session);
-    parsedSession.expiresAt = Date.now() + 1000 * getMaxAge();
+    if (!sessionData) return null;
 
-    await this.instance.set(
-      sessionId,
-      JSON.stringify(parsedSession),
-      "EX",
-      getMaxAge(),
-    );
+    const session: SudoSession = {
+      ...JSON.parse(sessionData),
+      expiresAt: Date.now() + this.configs.sessionAge,
+    };
 
-    return parsedSession;
+    await this.setSession(sessionId, session, this.configs.sessionAge);
+    return session;
   }
 
-  async removeSession(sessionId: string) {
-    await this.instance.del(sessionId);
+  async removeSession(sessionId: string): Promise<void> {
+    const key = this.getSessionKey(sessionId);
+    await this.instance.del(key);
   }
 }

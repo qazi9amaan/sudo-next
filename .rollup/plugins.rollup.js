@@ -19,4 +19,5 @@ export default {
       format: "esm",
     },
   ],
+  external: ["ioredis", "crypto"],
 };
