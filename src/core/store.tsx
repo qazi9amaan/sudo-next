@@ -5,40 +5,31 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { SudoEnginee } from "./engine";
+import { SharedMemory } from "./mem";
 
-const { getConfig } = SudoEnginee.getInstance();
-const intitalData = getConfig().getDefaultSessionData();
+const enginee = SharedMemory.getEnginee();
+
+export class ClientAuthStore {
+  static getAuth() {}
+  static clearAuth() {}
+}
 
 export const AuthContext = createContext<SudoSession>({
-  ...intitalData,
-});
-
-export const UtilContext = createContext({
-  setAuth: (data: SudoSession) => {},
+  ...enginee.defaultSession,
 });
 
 type Props = PropsWithChildren<{ data: SudoSession | null }>;
 
 export const AuthStore = ({ children, data }: Props) => {
   const [state, setState] = useState<SudoSession>({
-    ...intitalData,
+    ...enginee.defaultSession,
     ...data,
   });
 
   useEffect(() => {
-    Object.defineProperty(window, "__SUDO_NEXT_INTERNAL_", {
-      get: () => ({
-        getState: () => Object.freeze(state),
-        resetState: () => setState(intitalData),
-      }),
-      configurable: false,
-      enumerable: false,
-    });
-    return () => {
-      delete window.__SUDO_NEXT_INTERNAL_;
-    };
-  }, []);
+    ClientAuthStore.getAuth = () => state;
+    ClientAuthStore.clearAuth = () => setState(enginee.defaultSession);
+  }, [state]);
 
   useEffect(() => {
     if (data) {
@@ -50,16 +41,12 @@ export const AuthStore = ({ children, data }: Props) => {
             setState(data);
           }
         } catch (error) {
-          setState(intitalData);
+          setState(enginee.defaultSession);
         }
       };
       getSession();
     }
   }, [data]);
 
-  return (
-    <UtilContext.Provider value={{ setAuth: setState }}>
-      <AuthContext.Provider value={state}>{children}</AuthContext.Provider>
-    </UtilContext.Provider>
-  );
+  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
 };

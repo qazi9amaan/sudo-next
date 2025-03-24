@@ -2,15 +2,15 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { getIronSession, IronSession } from "iron-session";
 import { SudoSession } from "../types";
-import { SudoEnginee } from "./engine";
+import { SharedMemory } from "./mem";
 
-const { getConfig } = SudoEnginee.getInstance();
+const enginee = SharedMemory.getEnginee();
 
 export const getSessionCookie = cache(async () => {
   const clientCookies = await cookies();
   const session = await getIronSession<SudoSession>(
     clientCookies, // The cookies from the client
-    getConfig().getSessionConfigs(), // The session options
+    enginee.sessionConfigs, // The session options
   );
   return session;
 });
@@ -18,8 +18,7 @@ export const getSessionCookie = cache(async () => {
 export async function setSessionCookie(session: SudoSession) {
   const instance = await getSessionCookie();
   Object.assign(instance, { ...session, ...instance });
-
-  instance.updateConfig(getConfig().getSessionConfigs());
+  instance.updateConfig(enginee.sessionConfigs);
   await instance.save();
 }
 

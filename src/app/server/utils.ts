@@ -4,19 +4,19 @@ import {
   getSessionCookie,
   setSessionCookie,
 } from "../../core/cookies";
-import { SudoEnginee } from "../../core/engine";
 import { SudoUser } from "../../types";
+import { SharedMemory } from "../../core/mem";
 
-const { getAdapter, getConfig } = SudoEnginee.getInstance();
+const enginee = SharedMemory.getEnginee();
 
 export const getAuth = cache(async () => {
   const session = await getSessionCookie();
-  if (!getConfig().isGenuineSession(session)) return null;
+  if (!enginee.isGenuineSession(session)) return null;
   return session;
 });
 
 export async function setAuth(user: SudoUser) {
-  const session = await getAdapter().createSession(user);
+  const session = await enginee.adapter.createSession(user);
   await setSessionCookie(session);
   return session;
 }
@@ -25,7 +25,7 @@ export async function clearAuth() {
   const session = await getSessionCookie();
   await Promise.all([
     // remove from redis
-    getAdapter().removeSession(session.sessionId),
+    enginee.adapter.removeSession(session.sessionId),
     // remove from cookie
     deleteSessionCookie(session),
   ]);
