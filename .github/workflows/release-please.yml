@@ -15,7 +15,7 @@ jobs:
       - name: Release
         id: release
         if: ${{ github.ref_name == 'dev' }}
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
         with:
           release-type: node
           target-branch: main
